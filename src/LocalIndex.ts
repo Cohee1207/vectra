@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises';
+import writeFileAtomic from 'write-file-atomic';
 import * as path from 'path';
 import { v4 } from 'uuid';
 import { ItemSelector } from './ItemSelector';
@@ -99,7 +100,7 @@ export class LocalIndex<TMetadata extends Record<string,MetadataTypes> = Record<
                 items: []
             };
 
-            await fs.writeFile(path.join(this._folderPath, this._indexName), JSON.stringify(this._data));
+            await writeFileAtomic(path.join(this._folderPath, this._indexName), JSON.stringify(this._data));
         } catch (err: unknown) {
             await this.deleteIndex();
             throw new Error('Error creating index');
@@ -151,7 +152,7 @@ export class LocalIndex<TMetadata extends Record<string,MetadataTypes> = Record<
 
         try {
             // Save index
-            await fs.writeFile(path.join(this._folderPath, this._indexName), JSON.stringify(this._update));
+            await writeFileAtomic(path.join(this._folderPath, this._indexName), JSON.stringify(this._update));
             this._data = this._update;
             this._update = undefined;
         } catch(err: unknown) {
@@ -352,7 +353,7 @@ export class LocalIndex<TMetadata extends Record<string,MetadataTypes> = Record<
             // Save remaining metadata to disk
             metadataFile = `${v4}.json`;
             const metadataPath = path.join(this._folderPath, metadataFile);
-            await fs.writeFile(metadataPath, JSON.stringify(item.metadata));
+            await writeFileAtomic(metadataPath, JSON.stringify(item.metadata));
         } else if (item.metadata) {
             metadata = item.metadata;
         }

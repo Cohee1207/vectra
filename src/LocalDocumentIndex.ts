@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises';
+import writeFileAtomic from 'write-file-atomic';
 import * as path from 'path';
 import { v4 } from 'uuid';
 import { GPT3Tokenizer } from "./GPT3Tokenizer";
@@ -294,11 +295,11 @@ export class LocalDocumentIndex extends LocalIndex<DocumentChunkMetadata> {
 
             // Save metadata file to disk
             if (metadata != undefined) {
-                await fs.writeFile(path.join(this.folderPath, `${documentId}.json`), JSON.stringify(metadata));
+                await writeFileAtomic(path.join(this.folderPath, `${documentId}.json`), JSON.stringify(metadata));
             }
 
             // Save text file to disk
-            await fs.writeFile(path.join(this.folderPath, `${documentId}.txt`), text);
+            await writeFileAtomic(path.join(this.folderPath, `${documentId}.txt`), text);
 
             // Add entry to catalog
             this._newCatalog!.uriToId[uri] = documentId;
@@ -425,7 +426,7 @@ export class LocalDocumentIndex extends LocalIndex<DocumentChunkMetadata> {
 
         try {
             // Save catalog
-            await fs.writeFile(path.join(this.folderPath, 'catalog.json'), JSON.stringify(this._newCatalog));
+            await writeFileAtomic(path.join(this.folderPath, 'catalog.json'), JSON.stringify(this._newCatalog));
             this._catalog = this._newCatalog;
             this._newCatalog = undefined;
         } catch(err: unknown) {
@@ -454,7 +455,7 @@ export class LocalDocumentIndex extends LocalIndex<DocumentChunkMetadata> {
                     uriToId: {},
                     idToUri: {},
                 };
-                await fs.writeFile(catalogPath, JSON.stringify(this._catalog));
+                await writeFileAtomic(catalogPath, JSON.stringify(this._catalog));
             } catch(err: unknown) {
                 throw new Error(`Error creating document catalog: ${(err as any).toString()}`);
             }
